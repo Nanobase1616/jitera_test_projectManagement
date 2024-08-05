@@ -1,0 +1,25 @@
+{
+  "header": {
+    "quotesEstimates": "Quotes/Estimates"
+  },
+  "quote": {
+    "creationDate": "Creation Date",
+    "quotesEstimates": "Quotes/Estimates",
+    "date": "2024 - 01 - 27",
+    "customerId": "Customer ID: 123",
+    "scheduledAcceptance": "Scheduled to be Accepted: 2024 - 01- 29",
+    "deliveryDate": "Delivery Date: 2024-01-03",
+    "customer": "Customer",
+    "customerName": "ABC Industries",
+    "quoteNumber": "Quote Number: 000234",
+    "subject": "Subject",
+    "subjectTitle": "New backend",
+    "estimatedTax": "Estimated Consumption Tax: 10%",
+    "taxExpiry": "Consumption Tax Expires: 2024-02-03",
+    "estimatedTotal": "Estimated Total",
+    "totalAmount": "100000000 yen",
+    "makeNewQuote": "Make New Quote",
+    "contactNumber": "123-456-7890",
+    "email": "xyz@123.com"
+  }
+}
