@@ -1,49 +1,63 @@
 import { useState } from 'react'
 
 import { useTranslation } from '@i18n/index'
+import { useDeleteQuoteEstimate } from '@services/quotesEstimates'
 import { Button } from '@components/atoms/Button'
 import { Toast } from '@components/atoms/Toast'
 import { useQueryExamples } from '@services/example'
-import {
-  useAuthenticationData,
-  useExampleAuthenticationMutation,
-  useLogoutMutation,
-} from '@services/authentication'
+import { useExampleAuthenticationMutation, useLogoutMutation } from '@services/authentication'
 
-import styles from './index.module.css'
+import styles from './Example.module.scss'
 
 function ExamplePage(): JSX.Element {
   const { t } = useTranslation()
-  const [params, setParams] = useState<{ page: number }>()
-  const authenticationData = useAuthenticationData()
-  const { data, isLoading } = useQueryExamples(params, {
-    enabled: !!authenticationData,
-  })
+  const { data, isLoading } = useQueryExamples()
   const exampleAuthenticationMutation = useExampleAuthenticationMutation()
   const logoutMutation = useLogoutMutation()
+  const [quoteIdToDelete, setQuoteIdToDelete] = useState<number | null>(null)
+  const deleteQuoteEstimateMutation = useDeleteQuoteEstimate()
 
   const handleNext = () =>
     setParams((old) => ({ ...(old || {}), page: (old?.page || 1) + 1 }))
-  const handleAuthentication = async () => {
-    if (!authenticationData) {
-      await exampleAuthenticationMutation.mutateAsync({
-        table: 'example',
-        username: 'example',
-      })
-      Toast.success(t('example.login_success'))
+
+  const handleAuthentication = () => {
+    if (authenticationData) {
+      logoutMutation.mutate()
     } else {
-      await logoutMutation.mutateAsync({})
-      Toast.success(t('example.logout_success'))
+      exampleAuthenticationMutation.mutate()
     }
   }
+
+  const handleDeleteQuote = async () => {
+    if (quoteIdToDelete !== null) {
+      try {
+        await deleteQuoteEstimateMutation.mutateAsync(quoteIdToDelete)
+        Toast.success(t('Quote/Estimate deleted successfully'))
+        setQuoteIdToDelete(null)
+      } catch (error: any) {
+        Toast.error(error.message || t('An error occurred while deleting the quote/estimate.'))
+      }
+    } else {
+      Toast.error(t('Please provide a valid Quote ID to delete.'))
+    }
+  }
+
+  const handleQuoteIdChange = (e: React.ChangeEvent<HTMLInputElement>) => setQuoteIdToDelete(Number(e.target.value))
 
   return (
     <div className={styles.page_container}>
       <div className={styles.container}>
-        <div className={styles.center_card}>
+        <div className={styles.content}>
           <Button
+            disabled={
+              isLoading ||
+              exampleAuthenticationMutation.isLoading ||
+              logoutMutation.isLoading
+            }
             title={
-              (authenticationData ? t('example.logout') : t('example.login')) ||
+              (authenticationData
+                ? t('example.logout')
+                : t('example.login')) ||
               ''
             }
             onClick={handleAuthentication}
@@ -64,6 +78,18 @@ function ExamplePage(): JSX.Element {
                 title={t('example.next') || ''}
                 onClick={handleNext}
               />
+              <div>
+                <input
+                  type="number"
+                  placeholder={t('Enter Quote ID to delete')}
+                  onChange={handleQuoteIdChange}
+                />
+                <Button
+                  title={t('Delete Quote/Estimate') || ''}
+                  onClick={handleDeleteQuote}
+                  disabled={deleteQuoteEstimateMutation.isLoading}
+                />
+              </div>
             </>
           ) : null}
         </div>
